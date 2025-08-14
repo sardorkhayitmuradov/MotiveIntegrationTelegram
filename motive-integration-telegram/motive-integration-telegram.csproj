@@ -9,6 +9,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="src\Utils\**" />
+    <EmbeddedResource Remove="src\Utils\**" />
+    <None Remove="src\Utils\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="DotNetEnv" Version="3.1.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="RestSharp" Version="112.1.0" />
@@ -19,10 +25,6 @@
 	    <None Update=".env">
 		    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	    </None>
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="src\Utils\" />
     </ItemGroup>
 
 
