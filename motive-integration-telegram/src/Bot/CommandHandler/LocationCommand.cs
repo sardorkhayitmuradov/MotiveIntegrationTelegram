@@ -7,35 +7,51 @@ namespace motive_integration_telegram.src.Bot.CommandHandler
     public class LocationCommand
     {
         private readonly ITelegramBotClient _bot;
-        private readonly Message _message;
 
-        public LocationCommand(ITelegramBotClient bot, Message message)
+        public LocationCommand(ITelegramBotClient bot)
         {
             _bot = bot;
-            _message = message;
         }
 
-        public async Task ExecuteAsync()
+        public async Task ExecuteAsync(Message message, CancellationToken ct)
         {
-            var motive = new MotiveApiService();
-            var location = await motive.GetVehicleLocationAsync();
-
-            if (location == null)
+            try
             {
-                await _bot.SendMessage(_message.Chat.Id, "Could not fetch vehicle location.");
-                return;
+                var motiveService = new MotiveApiService();
+                var location = await motiveService.GetVehicleLocationAsync();
+
+                if (location == null)
+                {
+                    await _bot.SendMessage(
+                        message.Chat.Id,
+                        "⚠️ Could not retrieve vehicle location.",
+                        cancellationToken: ct
+                    );
+                    return;
+                }
+
+                var response = $"📍 *Vehicle Location:*\n" +
+                               $"Vehicle ID: {location.VehicleId}\n" +
+                               $"Latitude: {location.Latitude}\n" +
+                               $"Longitude: {location.Longtitude}\n" +
+                               $"Updated: {location.Timestamp:yyyy-MM-dd HH:mm}";
+
+                await _bot.SendMessage(
+                    message.Chat.Id,
+                    response,
+                    parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown,
+                    cancellationToken: ct
+                );
             }
-
-            await _bot.SendLocation(
-                _message.Chat.Id,
-                location.Latitude,
-                location.Longtitude
-            );
-
-            await _bot.SendMessage(
-                _message.Chat.Id,
-                $"Last update: {location.Timestamp:yyyy-MM-dd HH:mm:ss}"
-            );
+            catch (Exception ex)
+            {
+                Console.WriteLine($"⚠️ LocationCommand error: {ex.Message}");
+                await _bot.SendMessage(
+                    message.Chat.Id,
+                    "❌ Error retrieving location. Please try again later.",
+                    cancellationToken: ct
+                );
+            }
         }
 
     }
