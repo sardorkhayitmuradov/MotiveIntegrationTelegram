@@ -1,5 +1,5 @@
-﻿using System.Text.Json.Nodes;
-using System.Text.Json;
+﻿using motive_integration_telegram.src.Utils;
+using src.Bot;
 
 namespace motive_integration_telegram.src
 {
@@ -7,29 +7,26 @@ namespace motive_integration_telegram.src
     {
         public static async Task Main()
         {
-            var apiKey = "";
-            var vehicleId = ;
-
-            using var client = new HttpClient();
-            client.DefaultRequestHeaders.Add("accept", "application/json");
-            client.DefaultRequestHeaders.Add("x-api-key", apiKey);
-
-            var url = $"https://api.gomotive.com/v1/vehicle_locations?ids={vehicleId}";
+            Console.WriteLine("Motive Integration Telegram bot starting...");
 
             try
             {
-                var json = await client.GetStringAsync(url);
+                var telegramToken = ConfigHelper.GetEnvVar("TELEGRAM_BOT_TOKEN");
 
-                var doc = JsonNode.Parse(json);
-                var filteredVehicle = doc?["vehicles"]?
-                    .AsArray()
-                    .FirstOrDefault(v => v?["vehicle"]?["id"]?.ToString() == vehicleId.ToString());
+                if (string.IsNullOrWhiteSpace(telegramToken))
+                {
+                    throw new NotImplementedException("TELEGRAM_BOT_TOKEN is missing in environment variables.");
+                }
 
-                Console.WriteLine(filteredVehicle?.ToJsonString(new JsonSerializerOptions { WriteIndented = true }));
+                var botHandler = new TelegramBotHandler(telegramToken);
+                await botHandler.StartAsync();
+
+                Console.WriteLine("Bot is running. Press Ctrl+C to exit.");
+                await Task.Delay(-1);
             }
-            catch (HttpRequestException ex)
+            catch (Exception ex)
             {
-                Console.WriteLine($"HTTP error: {ex.Message}");
+                Console.WriteLine($"Fatal error: {ex.Message}");
             }
         }
     }
