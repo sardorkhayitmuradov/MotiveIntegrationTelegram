@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot;
+using motive_integration_telegram.src.Bot.CommandHandler;
 
-namespace motive_integration_telegram.src.Bot.CommandHandler
+namespace src.Bot
 {
     public class TelegramBotHandler
     {
