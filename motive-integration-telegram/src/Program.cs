@@ -14,10 +14,6 @@ namespace motive_integration_telegram.src
             var botService = new TelegramBotService(botToken, motiveService);
 
             await botService.StartAsync();
-                Console.WriteLine($"HTTP error: {ex.Message}");
-            }
-                Console.WriteLine($"HTTP error: {ex.Message}");
-            }
         }
     }
 }
