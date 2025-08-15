@@ -1,5 +1,5 @@
-﻿using System.Text.Json.Nodes;
-using System.Text.Json;
+﻿using motive_integration_telegram.src.Services;
+using motive_integration_telegram.src.Utils;
 
 namespace motive_integration_telegram.src
 {
@@ -7,30 +7,13 @@ namespace motive_integration_telegram.src
     {
         public static async Task Main()
         {
-            var apiKey = "";
-            var vehicleId = ;
+            var apiKey = ConfigHelper.GetEnvVar("MOTIVE_API_KEY");
+            var botToken = ConfigHelper.GetEnvVar("TELEGRAM_BOT_TOKEN");
 
-            using var client = new HttpClient();
-            client.DefaultRequestHeaders.Add("accept", "application/json");
-            client.DefaultRequestHeaders.Add("x-api-key", apiKey);
+            var motiveService = new MotiveApiService(apiKey);
+            var botService = new TelegramBotService(botToken, motiveService);
 
-            var url = $"https://api.gomotive.com/v1/vehicle_locations?ids={vehicleId}";
-
-            try
-            {
-                var json = await client.GetStringAsync(url);
-
-                var doc = JsonNode.Parse(json);
-                var filteredVehicle = doc?["vehicles"]?
-                    .AsArray()
-                    .FirstOrDefault(v => v?["vehicle"]?["id"]?.ToString() == vehicleId.ToString());
-
-                Console.WriteLine(filteredVehicle?.ToJsonString(new JsonSerializerOptions { WriteIndented = true }));
-            }
-            catch (HttpRequestException ex)
-            {
-                Console.WriteLine($"HTTP error: {ex.Message}");
-            }
+            await botService.StartAsync();
         }
     }
 }
